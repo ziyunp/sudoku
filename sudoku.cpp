@@ -79,7 +79,7 @@ bool is_complete(const char board[9][9]) {
 }
 
 bool make_move(const char position[], const char digit, const char board[9][9]) {
-  int row, col;
+  int row, col, add_to_row, add_to_col;
   // extract row from position (A-I)
   row = position[0] - 'A';
  
@@ -103,9 +103,13 @@ bool make_move(const char position[], const char digit, const char board[9][9]) 
   for(int r=0; r<9; r++) {
     if(digit == board[r][col])
       return false;
-  }
-  // check data of nonet?
-  
+  } 
+  cout << "Entering nonet: \n";
+
+  // check nonet
+  if(is_in_nonet(row, col, digit, board)) 
+    return false;
+
   return true;
 }
 
@@ -133,3 +137,58 @@ bool make_move(const char position[], const char digit, const char board[9][9]) 
 
 }
 */
+// function to check data of nonet
+bool is_in_nonet(int row, int col, char digit, const char board[9][9]) {
+
+  char nonet_values[9];
+  
+  get_nonet_values(row, col, board, nonet_values);
+  
+  for(int i=0; i<9; i++) {
+    if (nonet_values[i] == digit) 
+      return true;
+  }
+  return false;
+}
+
+void get_nonet_range(int position, int& min, int& max) {
+  int add_to_position;
+
+  for (int i=0; i<3; i++) {
+    if (!((position + i) % 3)) add_to_position = i;
+  }
+
+  if (add_to_position == 0) {
+    min = position;
+    max = position + 2;
+  }
+
+  if (add_to_position == 1) {
+    min = position - 2;
+    max = position;
+  }
+
+  if (add_to_position == 2) {
+    min = position - 1;
+    max = position + 1;
+  }
+}
+
+void get_nonet_values(int row, int col, const char board[9][9], char nonet_values[9]) {
+  int min_row=0, max_row=0, min_col=0, max_col=0;
+  
+  get_nonet_range(row, min_row, max_row);
+  get_nonet_range(col, min_col, max_col);
+
+  int i=0, r = min_row;
+  while(i<9) {
+    while(r <= max_row) {
+      int c = min_col;
+      while(c <= max_col) {
+	nonet_values[i++] = board[r][c];
+	c++;
+      }
+      r++;
+    }
+  }
+}

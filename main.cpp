@@ -50,14 +50,14 @@ int main() {
     cout << "NOT ";
   cout << "a valid move. The board is:" << '\n';
   display_board(board);
-
-  // Should be ok
-  cout << "Putting '3' into H2 is ";
-  if (!make_move("H2", '3', board)) 
+  
+  // Should be NOT ok
+  cout << "Putting '8' into E5 is ";
+  if (!make_move("E5", '8', board)) 
     cout << "NOT ";
   cout << "a valid move. The board is:" << '\n';
   display_board(board);
-
+  
   // Digit should be out of range
   cout << "Putting '0' into B9 is ";
   if (!make_move("B9", '0', board)) 
@@ -71,8 +71,8 @@ int main() {
     cout << "NOT ";
   cout << "a valid move. The board is:" << '\n';
   display_board(board);
-
-	
+  
+ 
 
   /* cout << "=================== Question 3 ===================" << "\n\n";
 
