@@ -78,7 +78,7 @@ bool is_complete(const char board[9][9]) {
   return true;
 }
 
-bool make_move(const char position[], const char digit, const char board[9][9]) {
+bool make_move(const char position[], const char digit, char board[9][9]) {
   int row, col, add_to_row, add_to_col;
   // extract row from position (A-I)
   row = position[0] - 'A';
@@ -104,12 +104,14 @@ bool make_move(const char position[], const char digit, const char board[9][9]) 
     if(digit == board[r][col])
       return false;
   } 
-  cout << "Entering nonet: \n";
 
   // check nonet
   if(is_in_nonet(row, col, digit, board)) 
     return false;
 
+  // input to board
+  board[row][col] = digit;
+  
   return true;
 }
 
