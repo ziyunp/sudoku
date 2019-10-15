@@ -74,7 +74,7 @@ int main() {
   
  
 
-  /* cout << "=================== Question 3 ===================" << "\n\n";
+ cout << "=================== Question 3 ===================" << "\n\n";
 
   load_board("easy.dat", board);
   if (save_board("easy-copy.dat", board))
@@ -83,7 +83,7 @@ int main() {
     cout << "Save board failed." << '\n';
   cout << '\n';
 
-  cout << "=================== Question 4 ===================" << "\n\n";
+  /* cout << "=================== Question 4 ===================" << "\n\n";
 
   load_board("easy.dat", board);
   if (solve_board(board)) {

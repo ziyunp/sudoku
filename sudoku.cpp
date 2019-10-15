@@ -113,13 +113,15 @@ bool make_move(const char position[], const char digit, const char board[9][9]) 
   return true;
 }
 
-/* bool save_board(const char* filename, const char board[9][9]) {
+bool save_board(const char* filename, const char board[9][9]) {
 
   cout << "Loading Sudoku board from file '" << filename << "'... ";
 
   ofstream out(filename);
-  if (!out)
+  if (!out) { 
     cout << "Failed!" << '\n';
+    return false;
+  }
   assert(out);
 
   int row = 0;
@@ -128,15 +130,22 @@ bool make_move(const char position[], const char digit, const char board[9][9]) 
       assert(board[row][n] == '.' || isdigit(board[row][n]));
       out.put(board[row][n]);
     }
-    row++;
-    
+    out << endl;
+    row++;    
   }
 
-  cout << ((row == 9) ? "Success!" : "Failed!") << '\n';
   assert(row == 9);
-
+  if (row == 9) {
+    cout << "Success!\n";
+    return true;
+  } else {
+    cout << "Failed!\n";
+    return false;
+  }
 }
-*/
+
+/* other helper functions */
+
 // function to check data of nonet
 bool is_in_nonet(int row, int col, char digit, const char board[9][9]) {
 
