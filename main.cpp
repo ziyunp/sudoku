@@ -32,7 +32,7 @@ int main() {
     cout << "NOT ";
   cout << "complete." << "\n\n";
 
-  /* cout << "=================== Question 2 ===================" << "\n\n";
+  cout << "=================== Question 2 ===================" << "\n\n";
 
   load_board("easy.dat", board);
 
@@ -43,9 +43,38 @@ int main() {
   cout << "a valid move. The board is:" << '\n';
   display_board(board);
 
-	// write more tests
+  // write more tests
+  // Should be NOT ok
+  cout << "Putting '8' into A2 is ";
+  if (!make_move("A2", '8', board)) 
+    cout << "NOT ";
+  cout << "a valid move. The board is:" << '\n';
+  display_board(board);
 
-  cout << "=================== Question 3 ===================" << "\n\n";
+  // Should be ok
+  cout << "Putting '3' into H2 is ";
+  if (!make_move("H2", '3', board)) 
+    cout << "NOT ";
+  cout << "a valid move. The board is:" << '\n';
+  display_board(board);
+
+  // Digit should be out of range
+  cout << "Putting '0' into B9 is ";
+  if (!make_move("B9", '0', board)) 
+    cout << "NOT ";
+  cout << "a valid move. The board is:" << '\n';
+  display_board(board);
+
+  // Position should be out of range
+ cout << "Putting '3' into K1 is ";
+  if (!make_move("K1", '3', board)) 
+    cout << "NOT ";
+  cout << "a valid move. The board is:" << '\n';
+  display_board(board);
+
+	
+
+  /* cout << "=================== Question 3 ===================" << "\n\n";
 
   load_board("easy.dat", board);
   if (save_board("easy-copy.dat", board))
