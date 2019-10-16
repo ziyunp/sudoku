@@ -95,23 +95,18 @@ bool make_move(const char position[], const char digit, char board[9][9]) {
     return false;
   
   // check data of the row
-  for(int c=0; c<9; c++) {
-    if(digit == board[row][c])
-      return false;
-  }
+  if(has_repeat_in_row(row, digit, board))
+    return false;
   // check data of the column
-  for(int r=0; r<9; r++) {
-    if(digit == board[r][col])
-      return false;
-  } 
+  if(has_repeat_in_col(col, digit, board))
+    return false;
 
   // check nonet
-  if(is_in_nonet(row, col, digit, board)) 
+  if(has_repeat_in_nonet(row, col, digit, board)) 
     return false;
 
   // input to board
   board[row][col] = digit;
-  
   return true;
 }
 
@@ -146,10 +141,56 @@ bool save_board(const char* filename, const char board[9][9]) {
   }
 }
 
+bool solve_board(char board[9][9]) {
+  static int num_of_trials = 0;
+  num_of_trials++;
+  if(num_of_trials == 1) 
+    // make a copy of board
+    save_board("board-copy.dat", board);
+  // mode: 0-nonet, 1-row, 2-column
+  int mode = 0;
+  while (mode < 3) {
+    // try solving with each mode
+    solve_by_mode(mode, board);
+    mode++;
+  }
+  
+  if (is_complete(board)) {
+    cout << "num of trials to complete: " << num_of_trials << endl;
+    return true;
+  }
+  else if(!is_complete(board)) {
+    solve_board(board);
+  }
+  // if fails, reset board
+  else {
+    // reset
+    load_board("board-copy.dat", board);
+    return false;
+  }
+}
 /* other helper functions */
 
+// function to check data of row
+bool has_repeat_in_row(const int row, const char digit, const char board[9][9]) {
+ for(int c=0; c<9; c++) {
+    if(digit == board[row][c])
+      return true;
+  }
+ return false;
+}
+
+// function to check data of col
+bool has_repeat_in_col(const int col, const char digit, const char board[9][9]) {
+  for(int r=0; r<9; r++) {
+    if(digit == board[r][col])
+      return true;
+  }
+  return false;
+}
+
 // function to check data of nonet
-bool is_in_nonet(int row, int col, char digit, const char board[9][9]) {
+bool has_repeat_in_nonet(const int row, const int col, const char digit, const char board[9][9]) {
 
   char nonet_values[9];
   
@@ -201,5 +242,188 @@ void get_nonet_values(int row, int col, const char board[9][9], char nonet_value
       }
       r++;
     }
+  }
+}
+
+void solve_by_mode(int mode, char board[9][9]) {
+  if (is_complete(board)) return;
+  // nonet
+  if(mode == 0)
+    solve_by_nonet(board);
+  // row
+  if(mode == 1)
+    solve_by_row(board);
+  //col
+  if(mode == 2)
+    solve_by_col(board);
+}
+
+void solve_by_row(char board[9][9]) {
+  int curr_row = 0;
+  while (curr_row < 9) {
+    int blank_count = 9;
+    char remaining_values[9] = {};
+    
+    // 1. get remaining values and blank count in the row
+    int n=0;
+    for(char num='1'; num<='9'; num++) {
+      int curr_col=0;
+      for(curr_col=0; curr_col<9; curr_col++) {
+	if(num == board[curr_row][curr_col])
+	  break;
+      }
+      if(curr_col == 9)
+	remaining_values[n++] = num;
+    }
+    blank_count = n;
+    
+    // 2. get no. of possible positions for each value
+    for(int count=0; count < blank_count; count++) {
+      char curr_digit = remaining_values[count];
+      
+      int num_of_possible_positions = 0;
+      for(int col=0; col<9; col++) {
+	if(board[curr_row][col] == '.') {
+	  if(!has_repeat_in_col(col, curr_digit, board) && !has_repeat_in_nonet(curr_row, col, curr_digit, board)) {
+	    num_of_possible_positions++;
+	    if(num_of_possible_positions > 1) break;
+	  }
+	}
+      }
+      
+      // 3. if only 1 possible position, make move
+      if(num_of_possible_positions == 1) {
+	for(int c=0; c<9; c++) {
+	  if(board[curr_row][c] == '.') {
+	    char position[2];
+	    position[0] = curr_row + 'A';
+	    position[1] = c + '1';
+	    if(make_move(position, curr_digit, board)) 
+	      break;
+	  }
+	}	  
+      }
+    }
+    curr_row++;
+  }
+}
+
+void solve_by_col(char board[9][9]) {
+  int curr_col = 0;
+  while (curr_col < 9) {
+    int blank_count = 9;
+    char remaining_values[9] = {};
+    // 1. get remaining values and blank count in the row
+    int n=0;
+    for(char num='1'; num<='9'; num++) {
+      int curr_row=0;
+      for(curr_row=0; curr_row<9; curr_row++) {
+	if(num == board[curr_row][curr_col])
+	  break;
+      }
+      if(curr_row == 9)
+	remaining_values[n++] = num;
+    }
+    blank_count = n;
+
+    // 2. get no. of possible positions for each value
+    for(int count=0; count < blank_count; count++) {
+      char curr_digit = remaining_values[count];
+
+      int num_of_possible_positions = 0;
+      for(int row=0; row<9; row++) {
+	if(board[row][curr_col] == '.') {
+	  if(!has_repeat_in_row(row, curr_digit, board) && !has_repeat_in_nonet(row, curr_col, curr_digit, board)) {
+	    num_of_possible_positions++;
+	    if(num_of_possible_positions > 1) break;
+	  }
+	}
+      }
+
+      // 3. if only 1 possible position, make move
+      if(num_of_possible_positions == 1) {
+	for(int r=0; r<9; r++) {
+	  if(board[r][curr_col] == '.') {
+	    char position[2];
+	    position[0] = r + 'A';
+	    position[1] = curr_col + '1';
+	    if(make_move(position, curr_digit, board)) 
+	      break;
+	  }
+	}	  
+      }
+    }
+    curr_col++;
+  }
+}
+
+void solve_by_nonet(char board[9][9]) {
+  int start_row = 0;
+  while (start_row <= 6) {
+    int start_col = 0;
+    while (start_col <=6) {
+      int max_row = start_row + 2;
+      int max_col = start_col + 2;
+      int blank_count = 9;
+      char existing_values[9] = {};
+      char remaining_values[9] = {};
+      // 1. get remaining values and blank count in the row
+      // get existing values in current nonet
+      get_nonet_values(start_row, start_col, board, existing_values);
+      // get remaining values in current nonet
+      int n = 0;
+      for(char num='1'; num<='9'; num++) {
+	int i;
+	for(i=0; i<9; i++) {
+	  if (num == existing_values[i]) {
+	    break;
+	  }
+	}
+	if (i==9) remaining_values[n++] = num;
+      }
+      blank_count = n;
+      // 2. get no. of possible positions for each value
+      for(int count=0; count < blank_count; count++) {
+	char curr_digit = remaining_values[count];
+
+	int num_of_possible_positions = 0;
+	int r = start_row;
+	while(r <= max_row) {
+	  int c = start_col;
+	  while(c <= max_col) {
+	    if (board[r][c] == '.') {
+	      if(!has_repeat_in_row(r, curr_digit, board) && !has_repeat_in_col(c, curr_digit, board)) {
+		num_of_possible_positions++;
+		if(num_of_possible_positions > 1) break;
+	      }
+	    }
+	    c++;
+	  }
+	  r++;
+	}
+
+	// 3. if only 1 possible position, make move
+	if(num_of_possible_positions == 1) {
+	  int row = start_row;
+	  while(row <= max_row) {
+	    int col = start_col;
+	    while(col <= max_col) {
+	      if (board[row][col] == '.') {
+		char position[2];
+		position[0] = row + 'A';
+		position[1] = col + '1';
+		if(make_move(position, curr_digit, board)) 
+		  break;
+	      }
+	      col++;
+	    }
+	    row++;
+	  }
+	}
+     
+      }
+      start_col += 3;
+    }
+    start_row += 3;
   }
 }

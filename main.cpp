@@ -7,7 +7,7 @@ using namespace std;
 int main() {
 
   char board[9][9];
-
+  
   /* This section illustrates the use of the pre-supplied helper functions. */
   cout << "============= Pre-supplied functions =============" << "\n\n";
 
@@ -17,7 +17,7 @@ int main() {
   cout << '\n' << "Displaying Sudoku board with display_board():" << '\n';
   display_board(board);
   cout << "Done!" << "\n\n";
-
+ 
   cout << "=================== Question 1 ===================" << "\n\n";
 
   load_board("easy.dat", board);
@@ -72,6 +72,12 @@ int main() {
   cout << "a valid move. The board is:" << '\n';
   display_board(board);
   
+  // Should be OK
+  cout << "Putting '7' into H7 is ";
+  if (!make_move("H7", '7', board)) 
+    cout << "NOT ";
+  cout << "a valid move. The board is:" << '\n';
+  display_board(board);
  
 
  cout << "=================== Question 3 ===================" << "\n\n";
@@ -83,7 +89,7 @@ int main() {
     cout << "Save board failed." << '\n';
   cout << '\n';
 
-  /* cout << "=================== Question 4 ===================" << "\n\n";
+  cout << "=================== Question 4 ===================" << "\n\n";
 
   load_board("easy.dat", board);
   if (solve_board(board)) {
@@ -92,7 +98,7 @@ int main() {
   } else 
     cout << "A solution cannot be found." << '\n';
   cout << '\n';
-
+ 
   load_board("medium.dat", board);
   if (solve_board(board)) {
     cout << "The 'medium' board has a solution:" << '\n';
@@ -101,11 +107,11 @@ int main() {
     cout << "A solution cannot be found." << '\n';
   cout << '\n';
 
-	// write more tests
-
+  // write more tests
+  /*
   cout << "=================== Question 5 ===================" << "\n\n";
 
-	// write more tests
-	*/
+  // write more tests
+  */
   return 0;
 }
