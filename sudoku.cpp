@@ -79,7 +79,7 @@ bool is_complete(const char board[9][9]) {
 }
 
 bool make_move(const char position[], const char digit, char board[9][9]) {
-  int row, col, add_to_row, add_to_col;
+  int row, col;
   // extract row from position (A-I)
   row = position[0] - 'A';
  
@@ -141,36 +141,34 @@ bool save_board(const char* filename, const char board[9][9]) {
   }
 }
 
-bool solve_board(char board[9][9]) {
+bool solve_board(char board[9][9], int total_blanks) {
   static int num_of_trials = 0;
   num_of_trials++;
-
-  //  bool no_progress = false;
-  if(num_of_trials == 1) 
-    // make a copy of board
+  // make a copy of original board
+  if(num_of_trials == 1)
     save_board("board-copy.dat", board);
  
- 
+  //  bool no_progress = false;
   //  int no_progress_count = 0;
- 
-    // try solving with each mode
-  if(!solve_by_mode(board, num_of_trials)) {
+  // int initial_total_blanks = total_blanks;
+  int final_total_blanks = solve_by_mode(board, num_of_trials);
       //  no_progress_count++;
       // cout << "no_progress: " << mode << " : " <<  no_progress_count << endl;
       // if (no_progress_count >= 2) no_progress = true;
-  } else {
-      // no_progress_count = 0;
-  }
-
-
   
+      // no_progress_count = 0;
+  // cout << "init: " << initial_total_blanks << endl;
+  // cout << "final: " << final_total_blanks << endl;
+
+
+  // check if board is complete
   if (is_complete(board)) {
     cout << "num of trials to complete: " << num_of_trials << endl;
     num_of_trials = 0;
     return true;
   }
   else if(!is_complete(board) && num_of_trials < 100) {
-    solve_board(board);
+    return solve_board(board, final_total_blanks);
   }
   // if fails, reset board
   else {
@@ -180,6 +178,7 @@ bool solve_board(char board[9][9]) {
     return false;
   }
 }
+
 /* other helper functions */
 
 // function to check data of row
@@ -256,30 +255,27 @@ void get_nonet_values(int row, int col, const char board[9][9], char nonet_value
   }
 }
 
-bool solve_by_mode(char board[9][9], int num_of_trials) {
-  if (is_complete(board)) return false;
+int solve_by_mode(char board[9][9], int num_of_trials) {
+  if (is_complete(board))
+    return 0;
+  int total_blanks;
   // alternate among nonet, row and col on each trial
-  if (!(num_of_trials % 3)) {
+  if (!(num_of_trials % 3))
+    total_blanks = solve_by_nonet(board);
+
+
+  else if(!(num_of_trials % 2))
+    total_blanks = solve_by_row(board);
   
-    if(!solve_by_nonet(board)) return false;
-  }
-
- else if(!(num_of_trials % 2)) {
-    if(!solve_by_row(board)) return false;
-  }
-
- else {
-    if(!solve_by_col(board)) return false;
-  }
-  return true;
+  else total_blanks = solve_by_col(board);
+  return total_blanks;
 }
 
-bool solve_by_row(char board[9][9]) {
- 
-  /*  int initial_total_blanks;
-  int final_total_blanks;
+
+int solve_by_row(char board[9][9]) {
+
   int total_blank_count = 0;
-  */
+  
   int curr_row = 0;
   while (curr_row < 9) {
     int blank_count = 9;
@@ -297,7 +293,7 @@ bool solve_by_row(char board[9][9]) {
 	remaining_values[n++] = num;
     }
     blank_count = n;
-    // total_blank_count += blank_count;
+    total_blank_count += blank_count;
     // 2. get no. of possible positions for each value
     for(int count=0; count < blank_count; count++) {
       char curr_digit = remaining_values[count];
@@ -328,21 +324,15 @@ bool solve_by_row(char board[9][9]) {
     }
     curr_row++;
   }
-  /* final_total_blanks = total_blank_count;
-  cout << "R initial total blanks: " << initial_total_blanks << endl;
-  cout << "R final blanks: " << final_total_blanks << endl;
-  if(initial_total_blanks > final_total_blanks)
-    return false;
-  */    
-  return true;
+ 
+  return total_blank_count;
 }
 
-bool solve_by_col(char board[9][9]) {
- 
-  /*  int initial_total_blanks;
-  int final_total_blanks;
+
+int solve_by_col(char board[9][9]) {
+
   int total_blank_count = 0;
-  */
+  
   int curr_col = 0;
   while (curr_col < 9) {
     int blank_count = 9;
@@ -359,8 +349,8 @@ bool solve_by_col(char board[9][9]) {
 	remaining_values[n++] = num;
     }
     blank_count = n;
+    total_blank_count += blank_count;
 
-    // total_blank_count += blank_count;
     // 2. get no. of possible positions for each value
     for(int count=0; count < blank_count; count++) {
       char curr_digit = remaining_values[count];
@@ -390,22 +380,15 @@ bool solve_by_col(char board[9][9]) {
     }
     curr_col++;
   }
-  /*
-  final_total_blanks = total_blank_count;
-  cout << "C initial total blanks: " << initial_total_blanks << endl;
-  cout << "C final blanks: " << final_total_blanks << endl;
-  if(initial_total_blanks && initial_total_blanks == final_total_blanks)
-    return false;
-  */  
-  return true;
+
+  return total_blank_count;
 }
 
-bool solve_by_nonet(char board[9][9]) {
 
-  /*  int initial_total_blanks;
-  int final_total_blanks;
+int solve_by_nonet(char board[9][9]) {
+
   int total_blank_count = 0;
-  */
+  
   int start_row = 0;
   while (start_row <= 6) {
     int start_col = 0;
@@ -430,9 +413,7 @@ bool solve_by_nonet(char board[9][9]) {
 	if (i==9) remaining_values[n++] = num;
       }
       blank_count = n;
-
-
-      //  total_blank_count += blank_count;
+      total_blank_count += blank_count;
 
       // 2. get no. of possible positions for each value
       for(int count=0; count < blank_count; count++) {
@@ -478,12 +459,8 @@ bool solve_by_nonet(char board[9][9]) {
     }
     start_row += 3;
   }
-  /*
-  final_total_blanks = total_blank_count;
-  cout << "NN initial total blanks: " << initial_total_blanks << endl;
-  cout << "NN final blanks: " << final_total_blanks << endl;
-  if(initial_total_blanks && (initial_total_blanks == final_total_blanks))
-    return false;
-  */
-  return true;
+
+  return total_blank_count;
 }
+
+

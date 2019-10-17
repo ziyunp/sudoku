@@ -66,7 +66,7 @@ int main() {
   display_board(board);
 
   // Position should be out of range
- cout << "Putting '3' into K1 is ";
+  cout << "Putting '3' into K1 is ";
   if (!make_move("K1", '3', board)) 
     cout << "NOT ";
   cout << "a valid move. The board is:" << '\n';
@@ -80,7 +80,7 @@ int main() {
   display_board(board);
  
 
- cout << "=================== Question 3 ===================" << "\n\n";
+  cout << "=================== Question 3 ===================" << "\n\n";
 
   load_board("easy.dat", board);
   if (save_board("easy-copy.dat", board))
@@ -106,37 +106,37 @@ int main() {
   } else 
     cout << "A solution cannot be found." << '\n';
   cout << '\n';
-
+  
   // write more tests
 
-  /*  cout << "=================== Question 5 ===================" << "\n\n";
+  /* cout << "=================== Question 5 ===================" << "\n\n";
 
   // write more tests
 
   load_board("mystery1.dat", board);
   if (solve_board(board)) {
-    cout << "The 'easy' board has a solution:" << '\n';
-    display_board(board);
+  cout << "The 'easy' board has a solution:" << '\n';
+  display_board(board);
   } else 
-    cout << "A solution cannot be found." << '\n';
+  cout << "A solution cannot be found." << '\n';
   cout << '\n';
 
   load_board("mystery2.dat", board);
   if (solve_board(board)) {
-    cout << "The 'easy' board has a solution:" << '\n';
-    display_board(board);
+  cout << "The 'easy' board has a solution:" << '\n';
+  display_board(board);
   } else 
-    cout << "A solution cannot be found." << '\n';
+  cout << "A solution cannot be found." << '\n';
   cout << '\n';
 
   load_board("mystery3.dat", board);
   if (solve_board(board)) {
-    cout << "The 'easy' board has a solution:" << '\n';
-    display_board(board);
+  cout << "The 'easy' board has a solution:" << '\n';
+  display_board(board);
   } else 
-    cout << "A solution cannot be found." << '\n';
+  cout << "A solution cannot be found." << '\n';
   cout << '\n';
   */
-
+  
   return 0;
 }
