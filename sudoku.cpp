@@ -147,13 +147,16 @@ bool solve_board(char board[9][9], int total_blanks) {
   // make a copy of original board
   if(num_of_trials == 1)
     save_board("board-copy.dat", board);
- 
-  bool no_progress = false;
+  
  
   int initial_total_blanks = total_blanks;
+  // solve by nonet/row/col
   int final_total_blanks = solve_by_mode(board, num_of_trials);
+
+   // check progress
+  bool no_progress = false;
   static int no_progress_count = 0;
-  
+ 
   if (final_total_blanks == initial_total_blanks)
     no_progress_count++;
   else if (final_total_blanks < initial_total_blanks) {
@@ -161,8 +164,10 @@ bool solve_board(char board[9][9], int total_blanks) {
     no_progress = false;
   }
   cout << no_progress_count << endl;
-  if (no_progress_count > 5) no_progress = true;
-  
+  if (no_progress_count > 5) {
+    cout << "final_total_blanks: " << final_total_blanks << endl;
+    no_progress = true;
+  }
   // check if board is complete
   if (is_complete(board)) {
     cout << "num of trials to complete: " << num_of_trials << endl;
@@ -172,12 +177,15 @@ bool solve_board(char board[9][9], int total_blanks) {
   else if(!is_complete(board) && !no_progress) {
     return solve_board(board, final_total_blanks);
   }
+  // no_progress call => increase possibility
+  
   // if fails, reset board
   else {
     // reset
     load_board("board-copy.dat", board);
     num_of_trials = 0;
-    return false;
+    //    return false;
+    return true;
   }
 }
 
@@ -260,6 +268,7 @@ void get_nonet_values(int row, int col, const char board[9][9], char nonet_value
 int solve_by_mode(char board[9][9], int num_of_trials) {
   if (is_complete(board))
     return 0;
+  
   int total_blanks;
   // alternate among nonet, row and col on each trial
   if (!(num_of_trials % 3))
@@ -465,4 +474,11 @@ int solve_by_nonet(char board[9][9]) {
   return total_blank_count;
 }
 
+int make_guesses(char board[9][9]){
+  // for first no_progress call => num_of_possible_positions = 2
+  // try one of the possible position
 
+  // solve the rest with num_of_possible_positions = 1
+
+  // fails, try another possible position
+}
