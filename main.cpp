@@ -109,7 +109,7 @@ int main() {
   
   // write more tests
 
-  /* cout << "=================== Question 5 ===================" << "\n\n";
+  cout << "=================== Question 5 ===================" << "\n\n";
 
   // write more tests
 
@@ -136,7 +136,7 @@ int main() {
   } else 
   cout << "A solution cannot be found." << '\n';
   cout << '\n';
-  */
+  
   
   return 0;
 }
