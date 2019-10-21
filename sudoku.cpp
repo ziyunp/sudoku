@@ -32,7 +32,6 @@ void load_board(const char* filename, char board[9][9]) {
     row++;
     in.getline(buffer,512);
   }
-  display_board(board);
   cout << ((row == 9) ? "Success!" : "Failed!") << '\n';
   assert(row == 9);
 }
@@ -507,10 +506,6 @@ bool make_a_guess(char board[9][9], int final_total_blanks, int retry_guess_coun
     remove("board-before-guess.dat");
     save_board("board-before-guess.dat", board);
   }
-    cout << "retry; " << retry_guess_count << endl;
-    cout << "call: " << call << endl;
-    cout << "guess_count: " << guess_count << endl;
-    cout << "r: " << row << "c: " << col << "max guess : " << max_guess << endl; 
   call++;
 
   if(guess_count == 0) {
