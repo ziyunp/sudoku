@@ -21,7 +21,7 @@ int main() {
   display_board(board);
   cout << "Done!" << "\n\n";
  
-  /* cout << "=================== Question 1 ===================" << "\n\n";
+  cout << "=================== Question 1 ===================" << "\n\n";
 
   load_board("easy.dat", board);
   cout << "Board is ";
@@ -93,20 +93,14 @@ int main() {
   cout << '\n';
 
   cout << "=================== Question 4 ===================" << "\n\n";
-  */
-  /*  
-    clock_t begin = clock();
     
-    load_board("medium.dat", board);
+    load_board("easy.dat", board);
     if (solve_board(board)) {
-      cout << "The 'medium' board has a solution:" << '\n';
+      cout << "The 'easy' board has a solution:" << '\n';
       display_board(board);
     } else 
       cout << "A solution cannot be found." << '\n';
     cout << '\n';
-    clock_t end = clock();
-    double elapsed_secs = double(end-begin)/CLOCKS_PER_SEC;
-    cout << "used time " << elapsed_secs *1000 << " ms" << endl; 
    
   load_board("medium.dat", board);
   if (solve_board(board)) {
@@ -117,41 +111,37 @@ int main() {
   cout << '\n';
   
   // write more tests
-  */
   cout << "=================== Question 5 ===================" << "\n\n";
-
+   
   // write more tests
-  clock_t begin = clock();
-  load_board("mystery3.dat", board);
+  /*  
+  load_board("mystery1.dat", board);
   if (solve_board(board)) {
-  cout << "The 'easy' board has a solution:" << '\n';
+  cout << "The 'mystery1' board has a solution:" << '\n';
   display_board(board);
   } else 
   cout << "A solution cannot be found." << '\n';
   cout << '\n';
-  clock_t end = clock();
-  double elapsed_secs = double(end-begin)/CLOCKS_PER_SEC;
-  cout << "used time " << elapsed_secs *1000 << " ms" << endl; 
   
-  
-  /*
   load_board("mystery2.dat", board);
   if (solve_board(board)) {
-  cout << "The 'easy' board has a solution:" << '\n';
+  cout << "The 'mystery2' board has a solution:" << '\n';
   display_board(board);
   } else 
   cout << "A solution cannot be found." << '\n';
   cout << '\n';
   */
-  /*
+  //clock_t begin = clock();
   load_board("mystery3.dat", board);
   if (solve_board(board)) {
-  cout << "The 'easy' board has a solution:" << '\n';
+  cout << "The 'mystery3' board has a solution:" << '\n';
   display_board(board);
   } else 
   cout << "A solution cannot be found." << '\n';
   cout << '\n';
-
+  /* clock_t end = clock();
+  double elapsed_secs = double(end-begin)/CLOCKS_PER_SEC;
+  cout << "used time " << elapsed_secs *1000 << " ms" << endl; 
   */
   return 0;
 }
