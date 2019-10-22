@@ -114,7 +114,7 @@ int main() {
   cout << "=================== Question 5 ===================" << "\n\n";
    
   // write more tests
-  /*  
+  
   load_board("mystery1.dat", board);
   if (solve_board(board)) {
   cout << "The 'mystery1' board has a solution:" << '\n';
@@ -130,7 +130,7 @@ int main() {
   } else 
   cout << "A solution cannot be found." << '\n';
   cout << '\n';
-  */
+  
   //clock_t begin = clock();
   load_board("mystery3.dat", board);
   if (solve_board(board)) {
