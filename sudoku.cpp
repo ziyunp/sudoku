@@ -32,7 +32,6 @@ void load_board(const char* filename, char board[9][9]) {
     row++;
     in.getline(buffer,512);
   }
-  display_board(board);
   cout << ((row == 9) ? "Success!" : "Failed!") << '\n';
   assert(row == 9);
 }
@@ -80,10 +79,7 @@ bool is_complete(const char board[9][9]) {
 
 bool make_move(const char position[], const char digit, char board[9][9]) {
   int row, col;
-  // extract row from position (A-I)
   row = position[0] - 'A';
- 
-  // extract column from position (1-9)
   col = position[1] - '1';
   
   // coordinates out of range
@@ -94,14 +90,12 @@ bool make_move(const char position[], const char digit, char board[9][9]) {
   if(digit < '1' || digit > '9')
     return false;
   
-  // check data of the row
   if(has_repeat_in_row(row, digit, board))
     return false;
-  // check data of the column
+
   if(has_repeat_in_col(col, digit, board))
     return false;
 
-  // check nonet
   if(has_repeat_in_nonet(row, col, digit, board)) 
     return false;
 
@@ -112,7 +106,7 @@ bool make_move(const char position[], const char digit, char board[9][9]) {
 
 bool save_board(const char* filename, const char board[9][9]) {
 
-  cout << "Loading Sudoku board from file '" << filename << "'... ";
+  cout << "Saving Sudoku board to file '" << filename << "'... ";
 
   ofstream out(filename);
   if (!out) { 
@@ -151,52 +145,51 @@ bool solve_board(char board[9][9], int total_blanks) {
   }
   
   int initial_total_blanks = total_blanks;
-  // solve by nonet/row/col
+  // solve by nonet / row / col
   int final_total_blanks = solve_by_mode(board, num_of_trials);
 
    // check progress
   bool no_progress = false;
   static int no_progress_count = 0;
- 
   if (final_total_blanks >= initial_total_blanks)
     no_progress_count++;
   else {
-    no_progress_count = 0;
-    no_progress = false;
+   reset_no_progress(no_progress, no_progress_count);
   }
 
+  // threshold to identify the need of making a guess 
+  // around 2 rounds of row -> col -> nonet
   if (no_progress_count > 5) {
     num_of_trials = 0;
     no_progress = true;
   }
-  // check if board is complete
+
   if (is_complete(board)) {
     num_of_trials = 0;
     retry_guess_count = 0;
     return true;
   }
-  else if(!is_complete(board) && !no_progress) {
+  else if(!no_progress) {
     return solve_board(board, final_total_blanks);
   }
-  else if(!is_complete(board) && no_progress) {
-    // call make guess + solve board until next no progress (call count)
+  else {
+    // make a guess when no progress
     if(make_a_guess(board, final_total_blanks)) {
-      no_progress_count = 0;
-      no_progress = false;
+      reset_no_progress(no_progress, no_progress_count);
       final_total_blanks--;
       return solve_board(board, final_total_blanks);
     }
     else if(retry_guess_count < 5) {
+      // when making a guess fails to solve, retry guessing on the next blank 
       retry_guess_count++;
       if(make_a_guess(board, final_total_blanks, retry_guess_count)) {
-	no_progress_count = 0;
-	no_progress = false;
-	final_total_blanks--;
-	return solve_board(board, final_total_blanks);
+        reset_no_progress(no_progress, no_progress_count);
+        final_total_blanks--;
+        return solve_board(board, final_total_blanks);
       }
     }
   } 
-  // if fails, reset board
+  // if fails, reset board and static variables
   load_board("board-copy.dat", board);
   num_of_trials = 0;
   retry_guess_count = 0;
@@ -309,12 +302,7 @@ int solve_by_row(char board[9][9]) {
     // 1. get remaining values and blank count in the row
     int n=0;
     for(char num='1'; num<='9'; num++) {
-      int curr_col=0;
-      for(curr_col=0; curr_col<9; curr_col++) {
-	if(num == board[curr_row][curr_col])
-	  break;
-      }
-      if(curr_col == 9)
+      if (!has_repeat_in_row(curr_row, num, board))
 	remaining_values[n++] = num;
     }
     blank_count = n;
@@ -339,8 +327,7 @@ int solve_by_row(char board[9][9]) {
 	for(int c=0; c<9; c++) {
 	  if(board[curr_row][c] == '.') {
 	    char position[2];
-	    position[0] = curr_row + 'A';
-	    position[1] = c + '1';
+	    get_position(curr_row, c, position);
 	    if(make_move(position, curr_digit, board)) 
 	      break;
 	  }
@@ -362,16 +349,11 @@ int solve_by_col(char board[9][9]) {
   while (curr_col < 9) {
     int blank_count = 9;
     char remaining_values[9] = {};
-    // 1. get remaining values and blank count in the row
+    // 1. get remaining values and blank count in the col
     int n=0;
     for(char num='1'; num<='9'; num++) {
-      int curr_row=0;
-      for(curr_row=0; curr_row<9; curr_row++) {
-	if(num == board[curr_row][curr_col])
-	  break;
-      }
-      if(curr_row == 9)
-	remaining_values[n++] = num;
+      if(!has_repeat_in_col(curr_col, num, board))
+      	remaining_values[n++] = num;
     }
     blank_count = n;
     total_blank_count += blank_count;
@@ -395,8 +377,7 @@ int solve_by_col(char board[9][9]) {
 	for(int r=0; r<9; r++) {
 	  if(board[r][curr_col] == '.') {
 	    char position[2];
-	    position[0] = r + 'A';
-	    position[1] = curr_col + '1';
+	    get_position(r, curr_col, position);
 	    if(make_move(position, curr_digit, board)) 
 	      break;
 	  }
@@ -421,21 +402,15 @@ int solve_by_nonet(char board[9][9]) {
       int max_row = start_row + 2;
       int max_col = start_col + 2;
       int blank_count = 9;
-      char existing_values[9] = {};
       char remaining_values[9] = {};
       // 1. get remaining values and blank count in the row
       // get existing values in current nonet
-      get_nonet_values(start_row, start_col, board, existing_values);
+
       // get remaining values in current nonet
       int n = 0;
       for(char num='1'; num<='9'; num++) {
-	int i;
-	for(i=0; i<9; i++) {
-	  if (num == existing_values[i]) {
-	    break;
-	  }
-	}
-	if (i==9) remaining_values[n++] = num;
+	if(!has_repeat_in_nonet(start_row, start_col, num, board))
+	  remaining_values[n++] = num;
       }
       blank_count = n;
       total_blank_count += blank_count;
@@ -468,8 +443,7 @@ int solve_by_nonet(char board[9][9]) {
 	    while(col <= max_col) {
 	      if (board[row][col] == '.') {
 		char position[2];
-		position[0] = row + 'A';
-		position[1] = col + '1';
+		get_position(row, col, position);
 		if(make_move(position, curr_digit, board)) 
 		  break;
 	      }
@@ -494,7 +468,7 @@ bool make_a_guess(char board[9][9], int final_total_blanks, int retry_guess_coun
   static int row = 0, col = 0, max_guess = 0;
   if(retry_guess_count >=1) {
     col = retry_guess_count;
-    load_board("board-before-guess.dat", board);    
+    load_board("board-without-guess.dat", board);    
     call = 0;
   }
   
@@ -504,14 +478,10 @@ bool make_a_guess(char board[9][9], int final_total_blanks, int retry_guess_coun
   static int final_blanks_array[9];
   
   if(call == 0) {
-    remove("board-before-guess.dat");
-    save_board("board-before-guess.dat", board);
+    remove("board-without-guess.dat");
+    save_board("board-without-guess.dat", board);
   }
-    cout << "retry; " << retry_guess_count << endl;
-    cout << "call: " << call << endl;
-    cout << "guess_count: " << guess_count << endl;
-    cout << "r: " << row << "c: " << col << "max guess : " << max_guess << endl; 
-  call++;
+    call++;
 
   if(guess_count == 0) {
     // save filled board
@@ -535,7 +505,6 @@ bool make_a_guess(char board[9][9], int final_total_blanks, int retry_guess_coun
     }
     if (max_guess < 1) {
       // reset static int 
-    guess_count = 0;
     // reset static array
     for(int i=0; i<max_guess; i++) {
       if(final_blanks_array[i])
@@ -543,9 +512,9 @@ bool make_a_guess(char board[9][9], int final_total_blanks, int retry_guess_coun
     }
     max_guess = 0;
 
-      load_board("board-before-guess.dat", board);
+
       call = 0;
-      //guess_count = 0;      
+      guess_count = 0;      
       return false;
     }
 
@@ -568,14 +537,15 @@ bool make_a_guess(char board[9][9], int final_total_blanks, int retry_guess_coun
     int min_final_blanks = final_blanks_array[0];
     for(int i=0; i<max_guess; i++) {
       if(final_blanks_array[i] < min_final_blanks) {
-	min_final_blanks = final_blanks_array[i];
-	index = i;
+	    min_final_blanks = final_blanks_array[i];
+	    index = i;
       }
     }
     // run one last time 
   } else if (guess_count > max_guess) {
     // reset static int 
     guess_count = 0;
+
     // reset static array
     for(int i=0; i<max_guess; i++) {
       if(final_blanks_array[i])
@@ -585,11 +555,15 @@ bool make_a_guess(char board[9][9], int final_total_blanks, int retry_guess_coun
     // reset prev blank
     board[row][col] = '.';
     // guess next blank
-    col++;
-    if(final_total_blanks < 5)
+    
+    if(final_total_blanks < 5) // try again on the current blank
       return make_a_guess(board, final_total_blanks);
-    else 
+    else {
+      call = 0;
+      col++;
       return false;
+    }
+      
   }
   // increment count for next call
   guess_count++;
@@ -600,13 +574,12 @@ bool make_a_guess(char board[9][9], int final_total_blanks, int retry_guess_coun
     if(!has_repeat_in_row(row, num, board) && !has_repeat_in_col(col, num, board) && !has_repeat_in_nonet(row, col, num, board)){
       possible_values[n++] = num;
     }
-    }
+  }
 
   // make move with possible values
   // put into function **
   char position[2];
-  position[0] = row + 'A';
-  position[1] = col + '1';
+  get_position(row, col, position);
   
   char digit = possible_values[index];
 
@@ -622,9 +595,18 @@ bool make_a_guess(char board[9][9], int final_total_blanks, int retry_guess_coun
 	final_blanks_array[i] = 0;
     }
     max_guess = 0;
-
+    call = 0;
 
     return false;
   }
 }
 
+void reset_no_progress(bool& no_progress, int& no_progress_count) {
+  no_progress_count = 0;
+  no_progress = false;
+}
+
+void get_position(int row, int col, char position[2]) {
+  position[0] = row + 'A';
+  position[1] = col + '1';
+}

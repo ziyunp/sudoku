@@ -15,7 +15,7 @@ int main() {
   cout << "============= Pre-supplied functions =============" << "\n\n";
 
   cout << "Calling load_board():" << '\n';
-  load_board("mystery1.dat", board);
+  load_board("easy.dat", board);
 
   cout << '\n' << "Displaying Sudoku board with display_board():" << '\n';
   display_board(board);
@@ -139,6 +139,7 @@ int main() {
   } else 
   cout << "A solution cannot be found." << '\n';
   cout << '\n';
+  
   /* clock_t end = clock();
   double elapsed_secs = double(end-begin)/CLOCKS_PER_SEC;
   cout << "used time " << elapsed_secs *1000 << " ms" << endl; 
