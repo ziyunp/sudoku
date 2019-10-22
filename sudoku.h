@@ -14,3 +14,5 @@ int solve_by_row(char board[9][9]);
 int solve_by_col(char board[9][9]);
 int solve_by_nonet(char board[9][9]);
 bool make_a_guess(char board[9][9], int final_total_blank, int retry_guess_count = 0);
+void reset_no_progress(bool& no_progress, int& no_progress_count);
+void get_position(int row, int col, char position[2]);
