@@ -473,9 +473,6 @@ bool make_a_guess(char board[9][9], int final_total_blanks, int retry_guess_coun
     call++;
 
   if(guess_count == 0) {
-    // save filled board
-    remove("filled-board-copy.dat");
-    save_board("filled-board-copy.dat", board);
     // find first blank
     for (; row<9; row++) {
       for (; col<9; col++) {
@@ -491,16 +488,14 @@ bool make_a_guess(char board[9][9], int final_total_blanks, int retry_guess_coun
   } else if (guess_count >= 1 && guess_count < max_guess) {
     // save previous blanks left
     final_blanks_array[guess_count - 1] = final_total_blanks;
-
-    // reset filled board
-    load_board("filled-board-copy.dat", board);
+    load_board("board-without-guess.dat", board);
     index = guess_count;
 
   } else if (guess_count == max_guess) {
     // save blanks 
     final_blanks_array[guess_count - 1] = final_total_blanks;
     // reset board
-    load_board("filled-board-copy.dat", board);
+    load_board("board-without-guess.dat", board);
     // loop through final_blanks, take min value's index
     int min_final_blanks = final_blanks_array[0];
     for(int i=0; i<max_guess; i++) {
@@ -521,13 +516,13 @@ bool make_a_guess(char board[9][9], int final_total_blanks, int retry_guess_coun
     max_guess = 0;
     // reset prev blank
     board[row][col] = '.';
-    // try again on the current blank
+    
+    // guess next blank
+    col++;
     if(final_total_blanks < 5) 
       return make_a_guess(board, final_total_blanks);
     else {
       call = 0;
-      // guess next blank 
-      col++;
       return false;
     }
       
