@@ -82,11 +82,8 @@ bool make_move(const char position[], const char digit, char board[9][9]) {
   row = position[0] - 'A';
   col = position[1] - '1';
 
-  // coordinates out of range
-  if(row < 0 || row > 8 || col < 0 || col > 8)
-    return false;
-
-  if(digit < '1' || digit > '9')
+  // coordinates or digit out of range
+  if(row < 0 || row > 8 || col < 0 || col > 8 || digit < '1' || digit > '9')
     return false;
 
   if(has_repeat_in_row(row, digit, board) || has_repeat_in_col(col, digit, board) || has_repeat_in_nonet(row, col, digit, board))
@@ -129,20 +126,20 @@ bool save_board(const char* filename, const char board[9][9]) {
 }
 
 bool solve_board(char board[9][9], int total_blanks) {
-  static int num_of_trials = 0, guess_row = 0, guess_col = 0, retry_index = 0, fail = 0;
+  static int num_of_trials = 0, guess_row = 0, guess_col = 0, retry_index = 0;
   num_of_trials++;
   // make a copy of original board
   if(num_of_trials == 1) {
-    remove("board-copy.dat");
+    //remove("board-copy.dat");
     save_board("board-copy.dat", board);
   }
 
   int initial_total_blanks = total_blanks;
-  // solve by nonet / row / col
+  // solve by rotating among different modes: nonet / row / col
   // only make a move when possible position == 1
   int final_total_blanks = solve_by_mode(board, num_of_trials);
 
-   // check progress
+  // check progress
   bool no_progress = false;
   static int no_progress_count = 0;
   if (final_total_blanks >= initial_total_blanks)
@@ -159,48 +156,62 @@ bool solve_board(char board[9][9], int total_blanks) {
   }
 
   if (is_complete(board)) {
-    reset_to_zero(num_of_trials, guess_row, guess_col, retry_index, fail);
+    reset_to_zero(num_of_trials, guess_row, guess_col, retry_index);
     return true;
   }
   else if(!no_progress) {
     return solve_board(board, final_total_blanks);
   }
   else {
-    // entered when no progress with solve by mode
-    // choose a blank and prepare a board for a guess
+    // make a guess when there is no progress with solve_by_mode
     if (retry_index == 0) {
-      get_a_blank(guess_row, guess_col, board);
-      save_board("before-guess.dat", board);
+      if (get_a_blank(guess_row, guess_col, board))
+        save_board("before-guess.dat", board);
+      else {
+        // have tried all blanks
+        load_board("board-copy.dat", board);
+        reset_no_progress(no_progress, no_progress_count);
+        reset_to_zero(num_of_trials, guess_row, guess_col, retry_index);
+        return false;
+      }
+        
     } else {
-      if (final_total_blanks > 5) 
-        // reset board
+      // reset board for retry at the index of next possible value
+      if (final_total_blanks > 5)
         load_board("before-guess.dat", board);
-      else 
+      else
         // reset previous guess at the chosen blank only
         board[guess_row][guess_col] = '.';
     }
-    // make a guess at the chosen blank 
+    // make a guess at the chosen blank
     // then call this function to solve by mode again
-    // if no progress again, retry with next possible value 
+    // if no progress again, retry with next possible value
     // if failed with all possible values, try next blank
-    // if fails to put in a value for >3 times, return false
+    // if fails to put in a value for 9 blanks, return false
     if(make_a_guess(guess_row, guess_col, board, retry_index)) {
       reset_no_progress(no_progress, no_progress_count);
       final_total_blanks--;
       return solve_board(board, final_total_blanks);
-    } else if (fail < 3) {
+    } else {
       // max guess < 1 or retry_index >= max guess or make move failed
       load_board("before-guess.dat", board);
       retry_index = 0;
-      fail++;
+
       // try next blank
-      guess_col++;
+      if(guess_col < 8)
+        guess_col++;
+      else {
+        guess_col = 0;
+        guess_row++;
+      }
+      
       return solve_board(board, final_total_blanks);
     }
   }
   // if fails, reset board and static variables
   load_board("board-copy.dat", board);
-  reset_to_zero(num_of_trials, guess_row, guess_col, retry_index, fail);
+  reset_no_progress(no_progress, no_progress_count);
+  reset_to_zero(num_of_trials, guess_row, guess_col, retry_index);
   return false;
 }
 
@@ -331,7 +342,7 @@ int solve_by_row(char board[9][9]) {
 	          get_position(curr_row, c, position);
 	          if(make_move(position, curr_digit, board))
 	            break;
-	        }       
+	        }
 	      }
       }
     }
@@ -465,12 +476,12 @@ void reset_no_progress(bool& no_progress, int& no_progress_count) {
   no_progress = false;
 }
 
-void get_position(int row, int col, char position[2]) {
+void get_position(const int row, const int col, char position[2]) {
   position[0] = row + 'A';
   position[1] = col + '1';
 }
 
-bool make_a_guess(int row, int col, char board[9][9], int& retry_index) {
+bool make_a_guess(const int row, const int col, char board[9][9], int& retry_index) {
   char possible_values[9], position[2];
   int max_guess = 0, index = 0;
 
@@ -479,33 +490,38 @@ bool make_a_guess(int row, int col, char board[9][9], int& retry_index) {
       possible_values[max_guess++] = num;
   }
   if (max_guess < 1 || retry_index >= max_guess)
-    return false; 
-  
+    return false;
+
   else {
     index = retry_index;
     get_position(row, col, position);
     char digit = possible_values[index];
     retry_index++;
     return make_move(position, digit, board);
-  } 
-  
+  }
+
 }
 
-void get_a_blank(int& row, int& col, char board[9][9]) {
-   for (; row<9; row++) {
-      for (; col<9; col++) {
-	      if (board[row][col] == '.')
-	        break;
+bool get_a_blank(int& row, int& col, char board[9][9]) {
+  if (row > 8 || col > 8) 
+    return false;
+
+  for (int r = row; r<9; r++) {
+    int c;
+    for (c = r == row ? col : 0; c<9; c++) {
+      if (board[r][c] == '.') {
+        row = r;
+        col = c;
+        return true;
       }
-      // break the loop if found a blank
-      if(col != 9) break;
     }
+  }
+  return false;
 }
 
-void reset_to_zero(int& num_of_trials, int& row, int& col, int& retry_index, int& fail) {
+void reset_to_zero(int& num_of_trials, int& row, int& col, int& retry_index) {
   num_of_trials = 0;
   row = 0;
   col = 0;
   retry_index = 0;
-  fail = 0;
 }
