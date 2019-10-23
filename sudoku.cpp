@@ -147,10 +147,8 @@ bool solve_board(char board[9][9], int total_blanks) {
    reset_no_progress(no_progress, no_progress_count);
   }
   // threshold to identify the need of making a guess -- around 2 rounds of row -> col -> nonet
-  if (no_progress_count > 5) {
-    num_of_trials = 0;
+  if (no_progress_count > 5) 
     no_progress = true;
-  }
 
   if (is_complete(board)) {
     reset_no_progress(no_progress, no_progress_count);
