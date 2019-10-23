@@ -36,7 +36,7 @@ int main() {
   cout << "complete." << "\n\n";
 
   cout << "=================== Question 2 ===================" << "\n\n";
-/*
+
   load_board("easy.dat", board);
 
   // Should be OK
@@ -81,7 +81,7 @@ int main() {
     cout << "NOT ";
   cout << "a valid move. The board is:" << '\n';
   display_board(board);
- */
+ 
 
   cout << "=================== Question 3 ===================" << "\n\n";
 
@@ -126,8 +126,7 @@ int main() {
   clock_t end_1 = clock();
   double elapsed_secs_1 = double(end_1-begin_1)/CLOCKS_PER_SEC;
   cout << "used time " << elapsed_secs_1 *1000 << " ms" << endl; 
-  
-  
+ 
   load_board("mystery2.dat", board);
   if (solve_board(board)) {
   cout << "The 'mystery2' board has a solution:" << '\n';
