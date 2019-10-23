@@ -109,13 +109,16 @@ int main() {
   } else 
     cout << "A solution cannot be found." << '\n';
   cout << '\n';
-  
+ 
   // write more tests
   cout << "=================== Question 5 ===================" << "\n\n";
    
   // write more tests
   
-  clock_t begin_1 = clock();
+  double sum = 0;
+  int n=0;
+  do { 
+  clock_t begin_1 = clock();  
   load_board("mystery1.dat", board);
   if (solve_board(board)) {
   cout << "The 'mystery1' board has a solution:" << '\n';
@@ -125,7 +128,11 @@ int main() {
   cout << '\n';
   clock_t end_1 = clock();
   double elapsed_secs_1 = double(end_1-begin_1)/CLOCKS_PER_SEC;
+  n++;
   cout << "used time " << elapsed_secs_1 *1000 << " ms" << endl; 
+  sum += elapsed_secs_1 * 1000;
+  } while(n < 10);
+  cout << "sum: " << sum/10 << endl;
  
   load_board("mystery2.dat", board);
   if (solve_board(board)) {

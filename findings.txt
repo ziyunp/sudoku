@@ -1,1 +1,10 @@
 Summarise your findings here (see specification).
+Sudoku difficulty:
+hard = "mystery1.dat"
+extremely hard = "mystery3.dat"
+impossible to solve = "mystery2.dat"
+Explanation: 
+No solution is found for mystery 2 after trying on all the blank spaces.
+Mystery 3 is harder than mystery 1 according to the number of times that solve_board is called and the average time taken to solve the board.
+Mystery 1: solve board is called for 108 times, average time taken is 3.3858ms.
+Mystery 3: solve board is called for 182 times, average time taken is 4.473ms.
